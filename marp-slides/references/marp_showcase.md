@@ -1,0 +1,352 @@
+---
+marp: true
+theme: thws-pr
+paginate: true
+header: '**This is the name of the module** <br> THWS online study programn - presentations with MARP'
+math: mathjax
+---
+
+<!-- _class: titlepage -->
+
+# Showcase <br>presentation      
+## for designing course presentations <br>with Markdown & MARP <br>
+
+###### (It can be so easy)
+
+---
+
+<!-- _class: structural center large-text-->
+
+# Content types
+#### Headings, Text, Lists, etc.
+
+---
+
+# 1 Text types
+
+This is normal text in *cursive* and **bold**
+
+You can use heading to structure your slides:
+
+# This is a H1 in *cursive* and **bold**
+## This is a H2 in *cursive* and **bold**
+### This is a H3 in *cursive* and **bold**
+#### This is a H4 in *cursive* and **bold**
+
+
+<br> H5 and H6 are used mainly for image captions
+
+##### This is a H5 in *cursive* and **bold**
+###### This is a H6 in *cursive* and **bold**
+---
+
+# 1 Text Types
+### in Markdown language:
+
+```
+This is normal text in *cursive* and **bold**
+
+# This is a H1 in *cursive* and **bold**
+## This is a H2 in *cursive* and **bold**
+### This is a H3 in *cursive* and **bold**
+#### This is a H4 in *cursive* and **bold**
+##### This is a H5 in *cursive* and **bold**
+###### This is a H6 in *cursive* and **bold**
+
+This is how you do an empty line: <br><br>
+
+```
+
+---
+
+# <!-- fit --> Attention, <br> please
+
+### you can fit headlines to grab the attention of your students<br><br>
+#### How to do that with Markdown:
+
+```
+# <!-- fit --> Attention, <br> please
+```
+
+
+---
+
+# 2 Lists
+
+You can do Bullet Point Lists:
+- List
+- List
+  - another Point
+
+You can also do numbered Lists:
+1. List Point
+    1.1. another point
+2. Point
+
+---
+
+# 2 Lists
+### in Markdown language:
+
+```
+You can do Bullet Point Lists:
+- List
+- List
+  - another Point
+
+You can also do numbered Lists:
+1. List Point
+    1.1. another point
+2. Point
+
+```
+
+---
+
+
+# 3 Quotes
+
+> »Abgeschieden wohnen sie in Buchstabhausen an der Küste <br> des Semantik, eines großen Sprachozeans.«
+
+<br><br>
+#### How to do that with Markdown:
+
+```
+> »Abgeschieden wohnen sie in Buchstabhausen an der Küste <br> 
+des Semantik, eines großen Sprachozeans.«
+```
+
+---
+
+# 4 Tables 
+
+
+| ID | Syntax | Description | Another Category |
+| --- | --- | --- | --- |
+| 1 | Header | Title | Value Number 1|
+| 2 | Paragraph | Text | Second Value |
+| 3 | Quote | Text |  Value 3 |
+
+
+#### <br> How to do that with Markdown:
+
+``` 
+| ID | Syntax | Description | Another Category |                       
+| --- | --- | --- | --- |
+| 1 | Header | Title | Value Number 1|
+| 2 | Paragraph | Text | Second Value |
+| 3 | Quote | Text |  Value 3 |
+```
+
+---
+
+# 5 Images 
+
+![Image](img/grafik-beispiel.jpg)
+
+###### **This is the image caption** <br> © This is the Copyright
+
+---
+
+# 5 Images 
+### in Markdown language:
+
+``` 
+![Image](img/grafik-beispiel.jpg)
+
+###### **This is the image caption** <br> © This is the Copyright
+```
+
+---
+
+# 6 Other content types
+
+**Links:**
+[I'm an inline-style link](https://www.google.com)
+
+**<br>Math:**
+$$ s^2 = \frac{\sum (x_i - \bar{x})^2}{n-1} $$  
+
+**<br>Code snippets:**
+```python
+s = "Python syntax highlighting"
+print s
+```
+
+---
+
+
+# 5 Other content types
+### in Markdown language:
+
+**Links:**
+``` 
+[I'm an inline-style link](https://www.google.com)                   
+```
+**Math:**
+```  
+$$ s^2 = \frac{\sum (x_i - \bar{x})^2}{n-1} $$                              
+```
+
+**Code:**
+``` 
+```python
+s = "Python syntax highlighting"                                   
+print s```
+```
+
+---
+
+<!-- _class: structural center large-text-->
+
+# Classes
+#### for title pages, fullscreen images, text sizing etc.
+
+
+---
+
+# What are classes
+
+Classes change the styling of elements to look a certain way
+You can apply these to slide by adding this code snippet before the slide content: 
+
+``` 
+<!-- _class: nameofclass -->
+```
+
+<bR> you can also add multiple classes like this:
+
+``` 
+<!-- _class: firstclass secondclass -->
+```
+
+---
+
+# Types of classes
+## Slide design
+| classname | What it does |              
+| --- | --- | 
+| **titlepage** | with petrol background and special headings; *only use this once* |
+| **structural** | for structural slides like intro, chapters, etc. |
+| **fullscreen** | renders fullscreen image with special caption styling |
+| **img_right** | renders image on the rights side with special caption styling |
+| **end** | aligns elements at the end of the slide |
+| **center** | aligns elements from the center of the slide |
+
+---
+
+# Types of classes
+## Element alignment
+At default all elements are aligned at the top of the slide. There may be use cases, when you want other options. <bR> Then you can use these classes:
+| classname | What it does |              
+| --- | --- | 
+| **end** | aligns elements at the end of the slide |
+| **center** | aligns elements from the center of the slide |
+
+---
+
+# Types of classes
+## Text sizing
+
+This is the default text size, but if you have content, which is a little longer you can change the text size by using these classes:
+
+| classname | What it does |              
+| --- | --- | 
+| **tiny-text** | changes font size of text, lists, links and tables, please avoid using this class regularly |
+| **small-text** | changes font size of text, lists, links |
+| **large-text** | changes font size of text, lists, links and H1 |
+
+---
+
+
+<!-- _class: structural center large-text-->
+
+# Examples
+#### use cases to copy
+
+---
+
+<!-- _class: titlepage center -->
+
+# The Title
+## titlepage with center class
+
+Only use this once in your presentation
+
+
+
+---
+
+<!-- _class: structural -->
+
+# This is a structure slide
+
+- you could structure and list your learning outcomes here
+- or you could use it for chapters
+- students will automatically notice that content changes when the see this type of slide <br> **so do not use it just to have a dark background**
+
+### <br><br>Only titlepages and strucure slides show the header with the module name and the unit title  
+
+
+---
+
+# Presentation content
+
+This is a **content** slide. This is always white. 
+*Plese do not use the chapter slides for content*
+
+### Types of content you can put here:
+- text, lists etc.
+- images
+- tables
+- quotes
+- code snippets
+- mathematical expressions
+
+---
+
+<!-- _class: fullscreen -->
+
+![Image](img/beispielbild.jpg)
+
+
+##### When you use the class *fullscreen*, the image caption will automatically look like this. This is a H5. **Here could be a copyright**
+###### You could do another caption, if you want. This is a H6.
+---
+
+<!-- _class: img-right -->
+
+# Class *img-right*
+
+Here you could put text or lists,
+or tables
+
+**!! Please be aware the your avatar/your film you will overlap with the image**
+
+
+![img](img/beispielbild.jpg)
+
+###### **The image caption is placed here** <br> © Copyright
+
+---
+
+
+<!-- _class: end -->
+
+>»Abgeschieden wohnen sie in Buchstabhausen an der Küste <br> des Semantik, eines großen Sprachozeans.«
+
+## This is a quote with the end class. <bR>The quote will sit on the end of the slide.
+
+---
+
+<!-- _class: img-right small-text -->
+
+
+#### Case Study 1
+# img-right and small-text
+
+Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean. A small river named Duden flows by their place and supplies it with the necessary regelialia. <br> It is a paradisematic country, in which roasted parts of sentences fly into your mouth. Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic life. 
+
+![img](img/beispielbild2.jpg) 
+
+##### This is the caption © Copyright
