@@ -1,3 +1,11 @@
+---
+name: widget-analyzer
+description: Analyze Quarto lecture chapters (.qmd files) to identify didactically valuable opportunities for interactive HTML widgets. Generate concrete widget specifications that can be implemented using the html-builder skill and integrated via iframe. Use when the user requests widget analysis, asks to identify visualization opportunities, or wants to enhance lecture content with interactive elements. Trigger phrases include "Analysiere für Widget-Potenziale", "identify widget opportunities", "wo könnte ich interaktive Elemente einbauen".
+---
+
+
+
+
 # Widget Analyzer Skill
 
 ## Purpose
