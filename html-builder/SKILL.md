@@ -1,237 +1,225 @@
-# HTML-Builder Skill
+---
+name: html-builder
+description: Create standalone HTML/JS widgets for academic visualization, embedded via IFRAME in lecture notes. Use when the user requests interactive visualizations, educational widgets, demonstrations, simulations, or any standalone HTML-based academic content. Trigger phrases include "create an HTML widget", "build an interactive visualization", "make an IFRAME-embeddable demo", "HTML for lecture notes", or any request for educational web-based interactivity.
+---
 
-## Purpose
-Create standalone HTML/JS widgets for academic visualization, embedded via IFRAME in lecture notes. Generates interactive visualizations, educational widgets, demonstrations, simulations, or any standalone HTML-based academic content with THWS branding.
+# HTML Builder - Academic Visualization Widgets
+Create simple, focused HTML/JS widgets that complement and clarify lecture content through visualization and interaction.
+Philosophy
+Widgets are supplements, not replacements:
 
-## When to Use
-Trigger when the user requests:
-- "create an HTML widget"
-- "build an interactive visualization"
-- "make an IFRAME-embeddable demo"
-- "HTML for lecture notes"
-- Any request for educational web-based interactivity
-- Interactive demonstrations for teaching
-- Visualizations for German-speaking academic contexts
+Visualize ONE concept clearly
+Keep it simple and focused
+No author credits, metadata, or unnecessary text
+The surrounding lecture text provides context
 
-## THWS Brand Guidelines
+Design System (THWS Brand)
+Colors:
 
-### Colors
-```css
-/* Primary THWS Colors */
---thws-blue: #005b9c;
---thws-lightblue: #0088cc;
---thws-grey: #6e6e6e;
---thws-lightgrey: #d9d9d9;
---thws-white: #ffffff;
---thws-black: #2d2d2d;
+Primary: #ff6a00 (THWS Orange) - buttons, active states, highlights
+Text: #333333 (Dark Grey)
+Background: #ffffff (White)
 
-/* Accent Colors */
---thws-green: #7ab51d;
---thws-orange: #f39200;
---thws-red: #e30613;
-```
-
-### Typography
-- **Headings**: Arial, sans-serif, bold
-- **Body text**: Arial, sans-serif, regular
-- **Code/Mono**: 'Courier New', monospace
-
-### Logo Usage
-- THWS logo should appear subtly (top-right or bottom-right corner)
-- Logo URL: Use text "THWS" in brand blue if image not available
-- Always include "Technische Hochschule Würzburg-Schweinfurt" in footer
-
-## Technical Requirements
-
-### Structure
-1. **Standalone HTML file** - everything in one file
-2. **No external dependencies** where possible
-3. **Responsive design** - works on mobile and desktop
-4. **IFRAME-safe** - designed to be embedded
-5. **German language** by default (unless specified otherwise)
-
-### Template Structure
-```html
-<!DOCTYPE html>
+Typography:
+cssfont-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+File Structure
+Single HTML file with embedded CSS and JavaScript:
+html<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>[Widget Title]</title>
+    <title>[Short Widget Title]</title>
     <style>
-        /* THWS Brand Styles */
-        :root {
-            --thws-blue: #005b9c;
-            --thws-lightblue: #0088cc;
-            /* ... other colors ... */
-        }
-        
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: #ffffff;
-            color: var(--thws-black);
-        }
-        
-        .thws-header {
-            border-bottom: 3px solid var(--thws-blue);
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .thws-footer {
-            margin-top: 30px;
-            padding-top: 10px;
-            border-top: 1px solid var(--thws-lightgrey);
-            font-size: 0.8em;
-            color: var(--thws-grey);
-            text-align: center;
-        }
-        
-        /* Widget-specific styles here */
+        /* CSS here */
     </style>
 </head>
 <body>
-    <div class="thws-header">
-        <h1>[Widget Title]</h1>
-    </div>
-    
-    <div class="widget-content">
-        <!-- Interactive content here -->
-    </div>
-    
-    <div class="thws-footer">
-        <p>Technische Hochschule Würzburg-Schweinfurt | Prof. Dr. Christian Kraus</p>
-    </div>
-    
+    <!-- Content here -->
     <script>
-        // Widget functionality here
+        // JavaScript here
     </script>
 </body>
 </html>
-```
+Layout Requirements
+Keep It Compact
 
-### Best Practices
-1. **Interactivity**: Use vanilla JavaScript (no frameworks needed for small widgets)
-2. **Accessibility**: Include ARIA labels, keyboard navigation
-3. **Performance**: Optimize for quick loading in iframes
-4. **Comments**: German comments in code for student reference
-5. **Educational value**: Code should be readable and serve as learning example
+Target height: 400-500px (fits well in IFRAME without scrolling)
+Width: Responsive, but optimize for 700-800px
 
-## Common Widget Types
+Minimal Styling
+cssbody {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    box-sizing: border-box;
+}
 
-### 1. Data Visualization
-- Charts and graphs (use Canvas API or SVG)
-- Interactive timelines
-- Network diagrams
-- Statistical demonstrations
+.widget-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
 
-### 2. Conceptual Demonstrations
-- Algorithm visualizations
-- Process flows
-- System models
-- Interactive diagrams
+button {
+    background: #ff6a00;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
 
-### 3. Calculators & Tools
-- Financial calculators
-- Unit converters
-- Formula demonstrations
-- Interactive worksheets
+button:hover {
+    opacity: 0.9;
+}
+Content Guidelines
+What to Include
 
-### 4. Simulations
-- Economic models
-- Physical systems
-- Business scenarios
-- Game theory demonstrations
+✅ Interactive visualization
+✅ Minimal controls (sliders, buttons)
+✅ Live feedback/results
+✅ Brief labels (1-3 words)
 
-## External Libraries (if needed)
-When vanilla JS is insufficient, prefer CDN-hosted libraries:
-- **Chart.js** for charts: `https://cdn.jsdelivr.net/npm/chart.js`
-- **D3.js** for complex visualizations: `https://d3js.org/d3.v7.min.js`
-- **Plotly** for scientific plots: `https://cdn.plot.ly/plotly-latest.min.js`
-- **MathJax** for formulas: `https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js`
+What to Exclude
 
-## Workflow
+❌ Long explanatory text (that's in the lecture)
+❌ Author credits, copyright notices
+❌ "About this widget" sections
+❌ Redundant titles (the lecture heading covers it)
+❌ Instructions paragraphs (if controls are self-explanatory)
 
-### Step 1: Understand Requirements
-- What concept/data should be visualized?
-- What interaction is needed?
-- Target audience level?
-- Language (German default)?
+Text Language
 
-### Step 2: Design Approach
-- Sketch the layout
-- Identify data structures
-- Plan interactivity
-- Choose technologies
+Detect from context (German or English)
+Keep ALL UI text in that language
+Use minimal text - let interaction speak
 
-### Step 3: Implement
-- Create HTML structure with THWS branding
-- Add interactive JavaScript
-- Style with CSS following brand guidelines
-- Test in browser
+Widget Patterns
+Pattern 1: Parameter Explorer
+Purpose: Show how changing parameters affects outcomes
+html<!-- Slider + Live Chart -->
+<div>
+    <label>Zinssatz: <span id="rate">5</span>%</label>
+    <input type="range" min="0" max="20" value="5" id="rateSlider">
+    <canvas id="chart"></canvas>
+</div>
+Pattern 2: Process Visualization
+Purpose: Show steps in a sequence
+html<!-- Step-by-step with navigation -->
+<div id="step-display"></div>
+<button onclick="prevStep()">← Zurück</button>
+<button onclick="nextStep()">Weiter →</button>
+Pattern 3: Interactive Diagram
+Purpose: Explore relationships
+html<!-- Clickable elements that highlight connections -->
+<svg id="diagram"></svg>
+<div id="info"></div>
+Technical Requirements
+JavaScript
 
-### Step 4: Deliver
-- Save as `.html` file
-- Provide embedding instructions
-- Include usage documentation if complex
+Use vanilla JS (no frameworks)
+CDN libraries only if absolutely necessary
+Keep code simple and readable
 
-## Output Format
+Canvas/SVG
 
-Always save the widget to `/mnt/user-data/outputs/[descriptive-name].html`
+Use Canvas for charts and animations
+Use SVG for diagrams and networks
+No external chart libraries unless essential
 
-After creating the widget, provide:
-1. **File download link**
-2. **Brief usage instructions**
-3. **Embedding code** for iframe:
+Responsiveness
+
+Works in IFRAME context
+No fixed pixel widths (use %, max-width)
+Touch-friendly controls (mobile)
+
+Output Format (CRITICAL)
+No Conversation
+
+Output ONLY the HTML code
+NO explanations before/after
+NO "Here's the widget" or similar phrases
+
+Single Code Block
 ```html
-<iframe src="[widget-name].html" width="100%" height="600px" frameborder="0"></iframe>
+<!DOCTYPE html>
+...entire widget...
+</html>
 ```
+Do NOT split the code. One continuous block from <!DOCTYPE> to </html>.
+Example: Simple Widget
+html<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROI Berechnung</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        #result {
+            font-size: 2rem;
+            color: #ff6a00;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <label>Investition: <span id="inv">10000</span> €</label>
+        <input type="range" id="invSlider" min="1000" max="50000" value="10000" step="1000">
+        
+        <label>Gewinn: <span id="profit">2000</span> €</label>
+        <input type="range" id="profitSlider" min="0" max="10000" value="2000" step="100">
+        
+        <div id="result">ROI: 20%</div>
+    </div>
+    
+    <script>
+        const invSlider = document.getElementById('invSlider');
+        const profitSlider = document.getElementById('profitSlider');
+        const invDisplay = document.getElementById('inv');
+        const profitDisplay = document.getElementById('profit');
+        const result = document.getElementById('result');
+        
+        function calculate() {
+            const inv = parseInt(invSlider.value);
+            const profit = parseInt(profitSlider.value);
+            const roi = ((profit / inv) * 100).toFixed(1);
+            
+            invDisplay.textContent = inv;
+            profitDisplay.textContent = profit;
+            result.textContent = `ROI: ${roi}%`;
+        }
+        
+        invSlider.addEventListener('input', calculate);
+        profitSlider.addEventListener('input', calculate);
+    </script>
+</body>
+</html>
+Quality Checklist
+Before delivering a widget, verify:
 
-## Examples of Past Widgets
+✅ Compact (fits ~500px height)
+✅ No author/metadata sections
+✅ Minimal text (UI labels only)
+✅ One clear purpose
+✅ THWS orange for primary actions
+✅ Single HTML file
+✅ Works standalone in IFRAME
 
-### Example 1: Interactive Timeline
-- Displays historical events
-- Click events for details
-- Smooth scrolling
-- German annotations
-
-### Example 2: Financial Calculator
-- Compound interest visualization
-- Input sliders for parameters
-- Real-time graph updates
-- Explanatory tooltips
-
-### Example 3: Process Flowchart
-- Interactive node selection
-- Animated transitions
-- Detailed explanations per step
-- Export to PNG option
-
-## Quality Checklist
-- [ ] THWS branding applied correctly
-- [ ] Responsive design (mobile + desktop)
-- [ ] All text in German (unless specified)
-- [ ] Code is commented and educational
-- [ ] No console errors
-- [ ] Accessible (keyboard navigation, ARIA)
-- [ ] Loads quickly in iframe
-- [ ] Footer includes THWS attribution
-
-## Notes
-- Widgets should be **pedagogically valuable** - code quality matters for student reference
-- Keep file size reasonable (< 500KB ideally)
-- Test in multiple browsers if using advanced features
-- Consider providing a "How it works" section in the widget itself
-- Always include source code comments in German for educational transparency
-
-## Error Handling
-- Graceful degradation if browser doesn't support features
-- Clear error messages in German
-- Fallback for missing data or user errors
-
-## Version Control
-- Include version number and date in footer
-- Comment major changes in code
-- Keep changelog if widget is updated frequently
+Remember
+Simplicity is key. The lecture text does the teaching - the widget just makes one concept visual and interactive.
