@@ -78,7 +78,7 @@ Separates problem from solution. Forces thinking.
 Mr. Müller forgot to create the provision.
 
 ::: {.solution}
-**Solution:** According to § 249 HGB, he must capitalize it.
+According to § 249 HGB, he must capitalize it.
 :::
 :::
 ```
@@ -100,6 +100,7 @@ List with checkbox logic. Mark the correct answer in bold.
 ```markdown
 ::: {.quick-check}
 Which principle dominates in HGB?
+
 - Fair Value
 - **Vorsichtsprinzip (Prudence Principle)**
 - Matching Principle
