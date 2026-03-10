@@ -34,32 +34,37 @@ For each of the top 3 widget specifications:
 ### Step 3: File Organization Phase
 **Directory Structure:**
 ```
-widgets/
-└── kapitel-XX/
-    ├── widget-[name-1].html
-    ├── widget-[name-2].html
-    └── widget-[name-3].html
+[qmd-directory]/
+└── widgets/
+    └── kapitel-XX/
+        ├── widget-[name-1].html
+        ├── widget-[name-2].html
+        └── widget-[name-3].html
 ```
 
 **Rules:**
-- Extract chapter number from .qmd filename or heading
+- Extract chapter number from .qmd filename (e.g., `kap-03-...qmd` → `kapitel-03`)
 - Use descriptive, lowercase, dash-separated names
-- Save all widgets to `/home/claude/widgets/kapitel-XX/`
+- Save widgets to `widgets/kapitel-XX/` **relative to the .qmd file's directory**
 - Verify each file is saved successfully
 
 ### Step 4: Integration Phase
 **For each widget:**
 1. Locate the specified insertion point in .qmd
 2. Add contextual intro text (1-2 sentences in document language)
-3. Insert iframe code:
-```html
-<iframe src="widgets/kapitel-XX/widget-[name].html" 
+3. Insert wrapped in the `.widget` Div — this is mandatory for PDF compatibility:
+```markdown
+::: {.widget}
+<iframe src="widgets/kapitel-XX/widget-[name].html"
         width="100%" height="[appropriate-height]px" frameborder="0"
         title="[Accessible title in document language]">
 </iframe>
+:::
 ```
-4. Add blank line after iframe for readability
+4. Add blank line after the closing `:::` for readability
 5. Use `str_replace` to make precise, surgical edits
+
+**Why `.widget`?** The quarto-lecture skill uses Lua filters that turn `.widget` divs into contained boxes in PDF output. Bare `<iframe>` tags in .qmd files break PDF rendering.
 
 **Integration Strategy:**
 - Identify unique text anchors near insertion points
@@ -95,7 +100,7 @@ Create a summary report for the user:
    - Eingefügt: [...]
 
 ## Dateipfade
-- Widgets: `/home/claude/widgets/kapitel-XX/`
+- Widgets: `[qmd-directory]/widgets/kapitel-XX/`
 - Aktualisierte .qmd: [filepath]
 
 ## Nächste Schritte
@@ -124,15 +129,15 @@ Create a summary report for the user:
 ## Output Destinations
 
 **Always use these paths:**
-- Widgets: `/home/claude/widgets/kapitel-XX/*.html`
+- Widgets: `[qmd-directory]/widgets/kapitel-XX/*.html` (relative to the .qmd file's location)
 - Modified .qmd: Keep in original location (use str_replace)
 
-**Then use `present_files`:**
+**Then use `present_files` if available:**
 ```
 present_files([
-  "/home/claude/widgets/kapitel-XX/widget-1.html",
-  "/home/claude/widgets/kapitel-XX/widget-2.html", 
-  "/home/claude/widgets/kapitel-XX/widget-3.html",
+  "[qmd-directory]/widgets/kapitel-XX/widget-1.html",
+  "[qmd-directory]/widgets/kapitel-XX/widget-2.html",
+  "[qmd-directory]/widgets/kapitel-XX/widget-3.html",
   "[original-qmd-path]"
 ])
 ```

@@ -201,3 +201,4 @@ When the user asks for a "Fallstudie" or "teaching case" as a standalone documen
 4. **Architect:** Map content to Trinity of Depth. Sketch the H2 sections before writing — which section carries Theory, which Norm, which Practice?
 5. **Draft:** Write prose, integrate interactive elements at the density described above. Load `references/chapter-example.md` as a structural reference if needed.
 6. **Save:** Write file to `outputs/kap-{nn}-{slug}.qmd`. Use the file naming convention.
+7. **Offer next step:** After saving, always offer the widget pipeline: *"Das Kapitel ist gespeichert. Soll ich jetzt die Widget-Pipeline starten und interaktive Visualisierungen automatisch identifizieren und einbauen?"* (or in English: *"Chapter saved. Would you like me to run the widget pipeline to automatically identify and build interactive visualizations for this chapter?"*)
