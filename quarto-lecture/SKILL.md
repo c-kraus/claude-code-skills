@@ -104,11 +104,26 @@ Mr. Müller forgot to create the provision.
 
 ### C. Fill-in-the-Blank (Active Recall)
 
-Mark target terms in italics. Good for core definitions, key vocabulary, and formula components.
+One or two sentences where the key terms students must supply are marked in *italics*. The Lua filter converts each italicized word/phrase into a draggable blank. Good for reinforcing core definitions, formula components, and key vocabulary.
+
+**Rules for drag-exercise:**
+- **No heading inside the div** — the div needs no `####`, just the sentence(s)
+- **1–2 sentences max** — this is a focused recall prompt, not a paragraph
+- **Italics = fillable term** — use `*term*` for every word/phrase the student drags in
+- **No bullet lists** — must be flowing sentence form
 
 ```markdown
 ::: {.drag-exercise}
 The balance sheet is a *point-in-time statement*, the P&L is a *period statement*.
+:::
+```
+
+**Wrong — do not do this:**
+```markdown
+::: {.drag-exercise}
+#### Fill in the blanks          ← NO heading inside
+- The balance sheet shows *assets*
+- The P&L shows *revenues*       ← NO list format
 :::
 ```
 
@@ -129,10 +144,30 @@ Which principle dominates in HGB?
 
 For core concepts. H4 title = front of card; body = back of card.
 
+**Critical rules for flip-card:**
+- Use **H4 (`####`) for the term** — not H3, not H2, not bold text
+- **No blank line between `####` heading and the body text** — the Lua filter depends on the heading being immediately followed by the definition text
+- Body should be **one concise paragraph** — a definition, not a multi-section explanation
+- Multiple flip-cards for related concepts: write them as **separate adjacent divs**, not nested
+
 ```markdown
 ::: {.flip-card}
 #### Rückstellung (Provision)
 A liability that is uncertain in terms of its basis or amount.
+:::
+```
+
+**Wrong — do not do this:**
+```markdown
+::: {.flip-card}
+#### Rückstellung (Provision)
+                                 ← NO blank line here — breaks the filter
+A liability that is uncertain in terms of its basis or amount.
+:::
+
+::: {.flip-card}
+### Vorsichtsprinzip             ← NO — must be H4 (####), not H3
+Content here.
 :::
 ```
 

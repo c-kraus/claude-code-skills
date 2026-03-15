@@ -1,0 +1,134 @@
+{
+  "skill_name": "heygen-video-producer",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Erstelle Intro und Outro Videos für meine Vorlesung: /Users/christiankraus/Documents/040_Polynomials.qmd",
+      "expected_output": "Two spoken-word scripts (intro + outro), each 110-130 words, in German, shown to user before HeyGen submission. Intro has a hook-first opening (no forbidden phrases). Outro focuses on transfer/meaning, not summary.",
+      "files": ["/Users/christiankraus/Documents/040_Polynomials.qmd"],
+      "assertions": [
+        {
+          "name": "intro_word_count_in_range",
+          "description": "Intro script has between 110 and 130 words",
+          "type": "programmatic"
+        },
+        {
+          "name": "outro_word_count_in_range",
+          "description": "Outro script has between 110 and 130 words",
+          "type": "programmatic"
+        },
+        {
+          "name": "intro_no_forbidden_openers",
+          "description": "Intro script does NOT start with any of: 'Herzlich willkommen', 'In dieser Vorlesung', 'Heute werden wir', 'Welcome', 'In this lecture'",
+          "type": "programmatic"
+        },
+        {
+          "name": "outro_no_summary_opener",
+          "description": "Outro does NOT contain summary openers like 'Wir haben heute gelernt', 'As we have seen', 'In this chapter we'",
+          "type": "programmatic"
+        },
+        {
+          "name": "correct_format_headers",
+          "description": "Output contains the required header format: '--- INTRO SCRIPT (word count:' and '--- OUTRO SCRIPT'",
+          "type": "programmatic"
+        },
+        {
+          "name": "user_confirmation_asked",
+          "description": "Output asks the user to confirm or adjust scripts before proceeding to HeyGen",
+          "type": "llm_judge"
+        },
+        {
+          "name": "scripts_content_specific",
+          "description": "Scripts reference polynomials, Horner's method, or other specific content from the QMD — not generic filler",
+          "type": "llm_judge"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "produce lecture videos for /Users/christiankraus/Documents/040_Polynomials.qmd",
+      "expected_output": "Two spoken-word scripts (intro + outro), each 110-130 words, in English (matching QMD language), shown to user before HeyGen submission. Intro has a hook-first opening. Outro focuses on transfer/meaning.",
+      "files": ["/Users/christiankraus/Documents/040_Polynomials.qmd"],
+      "assertions": [
+        {
+          "name": "intro_word_count_in_range",
+          "description": "Intro script has between 110 and 130 words",
+          "type": "programmatic"
+        },
+        {
+          "name": "outro_word_count_in_range",
+          "description": "Outro script has between 110 and 130 words",
+          "type": "programmatic"
+        },
+        {
+          "name": "intro_no_forbidden_openers",
+          "description": "Intro script does NOT start with any of: 'Herzlich willkommen', 'In dieser Vorlesung', 'Heute werden wir', 'Welcome', 'In this lecture'",
+          "type": "programmatic"
+        },
+        {
+          "name": "outro_no_summary_opener",
+          "description": "Outro does NOT contain summary openers like 'Wir haben heute gelernt', 'As we have seen', 'In this chapter we'",
+          "type": "programmatic"
+        },
+        {
+          "name": "correct_format_headers",
+          "description": "Output contains the required header format: '--- INTRO SCRIPT (word count:' and '--- OUTRO SCRIPT'",
+          "type": "programmatic"
+        },
+        {
+          "name": "user_confirmation_asked",
+          "description": "Output asks the user to confirm or adjust scripts before proceeding to HeyGen",
+          "type": "llm_judge"
+        },
+        {
+          "name": "scripts_content_specific",
+          "description": "Scripts reference polynomials, Horner's method, or other specific content from the QMD — not generic filler",
+          "type": "llm_judge"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "add video bookends to my Quarto lecture at /Users/christiankraus/Documents/040_Polynomials.qmd",
+      "expected_output": "Two spoken-word scripts (intro + outro), each 110-130 words, shown to user before HeyGen submission. Correct slug derived from filename (040_Polynomials). Output directory assets/videos/ mentioned.",
+      "files": ["/Users/christiankraus/Documents/040_Polynomials.qmd"],
+      "assertions": [
+        {
+          "name": "intro_word_count_in_range",
+          "description": "Intro script has between 110 and 130 words",
+          "type": "programmatic"
+        },
+        {
+          "name": "outro_word_count_in_range",
+          "description": "Outro script has between 110 and 130 words",
+          "type": "programmatic"
+        },
+        {
+          "name": "intro_no_forbidden_openers",
+          "description": "Intro script does NOT start with any of: 'Herzlich willkommen', 'In dieser Vorlesung', 'Heute werden wir', 'Welcome', 'In this lecture'",
+          "type": "programmatic"
+        },
+        {
+          "name": "outro_no_summary_opener",
+          "description": "Outro does NOT contain summary openers like 'Wir haben heute gelernt', 'As we have seen', 'In this chapter we'",
+          "type": "programmatic"
+        },
+        {
+          "name": "correct_format_headers",
+          "description": "Output contains the required header format: '--- INTRO SCRIPT (word count:' and '--- OUTRO SCRIPT'",
+          "type": "programmatic"
+        },
+        {
+          "name": "user_confirmation_asked",
+          "description": "Output asks the user to confirm or adjust scripts before proceeding to HeyGen",
+          "type": "llm_judge"
+        },
+        {
+          "name": "slug_correct",
+          "description": "Output mentions the slug '040_Polynomials' and/or the output path 'assets/videos/'",
+          "type": "programmatic"
+        }
+      ]
+    }
+  ]
+}

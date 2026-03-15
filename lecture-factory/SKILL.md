@@ -45,6 +45,57 @@ Do NOT use widget iframes in Stage 1 — those come in Stage 2. Placeholder comm
 <!-- Widget placeholder: ROI calculator goes here -->
 ```
 
+### QMD Quality Gate (run before saving)
+
+After drafting the .qmd but **before saving or presenting it**, scan every interactive element and fix any violations. This self-review step exists because these two elements are frequently malformed in ways that silently break the Moodle Lua filter.
+
+**Flip-card checklist — check every `::: {.flip-card}` block:**
+
+| Rule | Correct | Wrong (fix it) |
+|---|---|---|
+| Heading level | `#### Term` (H4) | `### Term` or `**Term**` |
+| Blank line after heading | None — body starts immediately on next line | Blank line between `####` and body |
+| Body length | One concise definition paragraph | Multiple paragraphs, headers, or lists inside |
+
+```
+✓ CORRECT:
+::: {.flip-card}
+#### Moral Hazard
+Risiko, dass der Agent nach Vertragsschluss Risiken eingeht, die der Prinzipal nicht beobachten kann.
+:::
+
+✗ WRONG (blank line breaks the filter):
+::: {.flip-card}
+#### Moral Hazard
+
+Risiko, dass der Agent...
+:::
+```
+
+**Drag-exercise checklist — check every `::: {.drag-exercise}` block:**
+
+| Rule | Correct | Wrong (fix it) |
+|---|---|---|
+| No heading inside | Body text only | Any `####` or `###` inside |
+| Format | 1–2 flowing sentences | Bullet lists, tables, or multi-paragraph blocks |
+| Fillable terms | Marked with `*italics*` | Unmarked, or marked with `**bold**` only |
+
+```
+✓ CORRECT:
+::: {.drag-exercise}
+Der Erfüllungsbetrag ist der Betrag, der zur *Erfüllung der Verpflichtung* voraussichtlich *aufgewendet* werden muss.
+:::
+
+✗ WRONG (heading inside, list format):
+::: {.drag-exercise}
+#### Lückentext
+- Der *Erfüllungsbetrag* ist...
+- Das *Vorsichtsprinzip* ist...
+:::
+```
+
+Fix all violations inline before proceeding. If unsure about any block, re-read the element rules in the quarto-lecture skill.
+
 ### Checkpoint
 
 After saving the .qmd, present it to the user and ask:
@@ -123,6 +174,8 @@ The output of this skill must meet the same standard as if both skills had been 
 
 - .qmd renders without errors in both HTML (Moodle) and PDF output
 - All Div containers use correct syntax (no bare HTML, no broken divs)
+- **Every `.flip-card` div:** `####` heading immediately followed by body (no blank line), H4 level only, one paragraph body
+- **Every `.drag-exercise` div:** no heading inside, 1–2 sentences, fillable terms in `*italics*`
 - Widget iframes use relative paths and are wrapped in `.widget` Div
 - No content was accidentally removed or corrupted during widget integration
 - Document language (German/English) is consistent throughout, including widget UI text
