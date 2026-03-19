@@ -7,7 +7,7 @@ Jede Datei muss mit diesem Block beginnen:
 
 ---
 marp: true
-theme: thws
+theme: thws-pr
 paginate: true
 header: '**Modul Name** <br> Prof. Dr. Christian Kraus'
 math: mathjax
