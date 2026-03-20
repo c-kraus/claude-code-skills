@@ -1,169 +1,251 @@
 ---
 name: cycling-analyzer
 description: >
-  Analysiert Radtraining-Einheiten aus Wahoo/Garmin FIT-Dateien (.fit, .fit.gz)
-  und vergleicht sie mit dem Trainingsplan (Markdown). Gibt Soll/Ist-Analyse,
-  Wochenübersicht, Empfehlungen für die nächste Einheit und optional einen
-  Quarto/Markdown-Report aus. Immer verwenden wenn der Nutzer FIT-Dateien
-  hochlädt, nach Trainingsauswertung fragt, seinen Trainingsplan auswerten
-  möchte, Soll/Ist-Vergleich beim Radfahren braucht, oder Begriffe wie
-  TSS, NP, IF, FTP, Powerzonen, Polarisierung, Trainingsstress,
-  Wochenvolumen, CTL, ATL erwähnt.
+  Analysiert Radtraining-Einheiten über die intervals.icu API und vergleicht
+  sie mit dem Trainingsplan (Markdown). Gibt Soll/Ist-Analyse, Wochenübersicht,
+  Intervall-Qualität (Power-Decay, Drehmoment, Entkopplung) und Trendanalyse
+  über mehrere Einheiten aus. Immer verwenden wenn der Nutzer nach
+  Trainingsauswertung fragt, seinen Trainingsplan auswerten möchte,
+  Soll/Ist-Vergleich beim Radfahren braucht, TSS/NP/IF/FTP-Werte analysieren
+  will, Intervall-Qualität oder Kraftausdauer-Entwicklung bewerten möchte,
+  oder Begriffe wie TSS, NP, IF, FTP, Powerzonen, Polarisierung, K3,
+  Trainingsstress, CTL, ATL, Pw:Hr, VI, intervals.icu erwähnt.
 ---
 
 # Cycling Analyzer Skill
 
-Analysiert Radtraining-Einheiten aus FIT-Dateien und vergleicht sie mit
-einem Trainingsplan in Markdown-Format.
+Analysiert Radtraining-Einheiten über die **intervals.icu API** und vergleicht
+sie mit dem Trainingsplan. Datenquelle ist intervals.icu (nicht mehr FIT-Dateien).
 
-## Workflow
+---
 
-### 1. FIT-Datei(en) einlesen
+## 0. Credentials (einmalig pro Session)
 
-Nutze das Analyse-Skript für alle bereitgestellten FIT-Dateien:
+Prüfe ob `/tmp/.icu_creds` existiert:
 
 ```bash
-pip install fitparse --break-system-packages -q
-python scripts/analyze_fit.py <datei.fit.gz> [weitere Dateien...]
+cat /tmp/.icu_creds 2>/dev/null
+```
+
+Wenn die Datei nicht existiert oder leer ist: **Frage den Nutzer einmalig**
+nach Athlete-ID und API Key (zu finden unter intervals.icu/settings →
+"Developer Settings"). Schreibe dann:
+
+```bash
+printf 'ATHLETE_ID=%s\nAPI_KEY=%s\n' "<id>" "<key>" > ~/.claude/skills/cycling-analyzer/.icu_creds
+chmod 600 ~/.claude/skills/cycling-analyzer/.icu_creds
+```
+
+Die Datei ist dauerhaft gespeichert und in `.gitignore` eingetragen — wird
+nie nochmals abgefragt.
+
+---
+
+## 1. Daten abrufen
+
+Installiere das requests-Package falls nötig:
+
+```bash
+pip3 install requests --break-system-packages -q
+```
+
+### Einzelner Tag / aktuelle Einheit
+
+```bash
+python3 ~/.claude/skills/cycling-analyzer/scripts/fetch_intervals_icu.py \
+  --creds-file /tmp/.icu_creds \
+  --date YYYY-MM-DD \
+  --with-intervals
+```
+
+### Letzte N Tage (Wochenübersicht)
+
+```bash
+python3 ~/.claude/skills/cycling-analyzer/scripts/fetch_intervals_icu.py \
+  --creds-file /tmp/.icu_creds \
+  --days 7
+```
+
+### Trendanalyse (mehrere Wochen, mit Intervall-Details)
+
+```bash
+python3 ~/.claude/skills/cycling-analyzer/scripts/fetch_intervals_icu.py \
+  --creds-file /tmp/.icu_creds \
+  --oldest YYYY-MM-DD --newest YYYY-MM-DD \
+  --with-intervals
 ```
 
 Das Skript gibt strukturiertes JSON zurück mit:
-- `date`, `duration_hms`, `distance_km`, `total_ascent_m`
-- `avg_power_w`, `normalized_power_w`, `ftp_w`, `intensity_factor`, `tss`
-- `avg_hr`, `max_hr`, `avg_cadence`, `avg_speed_kmh`
-- `power_zones` (Z1–Z6 mit Sekunden und Prozent)
-- `hr_zones` (Z1–Z5 mit Sekunden und Prozent)
-- `polarization` (low/mid/high %-Anteile)
-- `workout_name` (geplante Einheit laut Gerät, falls vorhanden)
+- `activities[]`: Liste der Radeinheiten im Zeitraum
+- Pro Aktivität: `avg_power_w`, `normalized_power_w` (NP), `ftp_w`,
+  `intensity_factor` (IF), `tss`, `variability_index` (VI), `avg_hr`,
+  `max_hr`, `avg_cadence`, `left_right_balance`, `pw_hr`
+- Bei `--with-intervals`: `intervals[]` (jedes WORK/REST-Segment) und
+  `interval_summary` mit `power_decay_pct`, `avg_torque_nm`,
+  `avg_decoupling_pct`, `hr_drift_pct`
 
-### 2. Trainingsplan lesen
+---
 
-Suche im Projektordner nach der Trainingsplan-Datei (typisch: `trainingsplan.md`,
-`plan.md`, oder ähnlich). Lies die Datei und identifiziere:
+## 2. Trainingsplan lesen
 
-- **Wochenstruktur**: Welche Einheiten sind für welchen Wochentag geplant?
-- **Einheitstypen**: Z2-Grundlage, Intervall, Tempo, Erholung, Langer Ritt
-- **Ziel-TSS**: Falls angegeben (Woche, Einheit)
-- **Intensitätsvorgaben**: Powerzonen, HR-Zonen, RPE
-- **FTP-Basis**: Falls im Plan vermerkt
+Suche im Projektordner nach dem Trainingsplan (typisch `kw*_trainingspeaks.md`,
+`grobplan.md`, oder ähnlich). Identifiziere:
 
-**Wenn kein Plan im Projektordner gefunden wird**: Frage den Nutzer nach dem
-Pfad oder fahre mit reiner Einzel-Analyse ohne Soll/Ist-Vergleich fort.
+- **Wochenstruktur**: Welche Einheit ist für welchen Tag geplant?
+- **Einheitstypen**: Z2, K3, Z5, Over-Under, Aktivierung
+- **Ziel-TSS**: Woche und Einheit
+- **Intensitätsvorgaben**: Powerzonen, Watt-Ziele, Kadenz
+- **FTP-Basis**: Im Plan vermerkt?
 
-### 3. Soll/Ist-Vergleich
+---
 
-Ordne die analysierte Einheit dem Trainingsplan zu (nach Datum und Einheitstyp)
-und erstelle den Vergleich:
+## 3. Soll/Ist-Vergleich (Einzel-Analyse)
 
-| Kennzahl          | Soll (Plan)     | Ist (Einheit)   | Abweichung |
-|-------------------|-----------------|-----------------|------------|
-| TSS               | z.B. 80–100     | 112.2           | +12–32%    |
-| Dauer             | z.B. 2:30       | 2:41:55         | +8%        |
-| Intensitäts-Typ   | Z2-Grundlage    | Z2/Z3-gemischt  | ⚠          |
-| Distanz           | ~70 km          | 65.3 km         | -7%        |
+Ordne die Einheit dem Plan zu und erstelle:
 
-**Polarisierungscheck**: Für polarisiertes Training ist die Faustformel:
-- Optimal: ~80% Zeit in Z1/Z2 (aerob niedrig), ~20% in Z4–Z6 (hochintensiv)
-- Z3-Anteil ("Mittelmaß-Zone") > 30% gilt als suboptimal
+| Kennzahl | Soll (Plan) | Ist (intervals.icu) | Abweichung |
+|---|---|---|---|
+| TSS | z.B. 90 | 56 | −38% |
+| Dauer | 1:15h | 0:47:32 | −37% |
+| NP | ~265W | 233W | −12% |
+| IF | ~0.96 | 0.85 | ⚠ |
+| Typ | K3 Kraftausdauer | ✓ | ✓ |
 
-### 4. Wochenübersicht (falls mehrere Dateien / Wochenkontext)
+**Intervall-Qualität** (wenn `interval_summary` vorhanden):
 
-Wenn mehrere Einheiten vorliegen oder der Wochenkontext aus dem Plan
-rekonstruiert werden kann:
+| Kennzahl | Wert | Bewertung |
+|---|---|---|
+| Intervalle abgeschlossen | 2/3 | ⚠ |
+| Power-Decay | −2.6% | ✓ gut |
+| Avg Drehmoment | 43 Nm | ✓ K3-Level |
+| Pw:Hr-Entkopplung | 2.1% | ✓ (<5%) |
+| HR-Drift 1.→letztes Int. | +4 bpm | ✓ stabil |
 
-- Gesammt-TSS der Woche vs. Ziel-TSS
-- Verteilung der Trainingsbelastung über die Woche
-- Kumulierter ATL-Schätzwert (Acute Training Load: 7-Tage-TSS-Durchschnitt)
+**Polarisierungscheck** (für Z2-Einheiten):
+- Optimal: ~80% Zeit Z1/Z2, ~20% Z4–Z6
+- Z3-Anteil > 30% = "Sweetspot-Drift"
 
-### 5. Empfehlungen
+---
 
-Leite konkrete Empfehlungen ab:
+## 4. Wochenübersicht
 
-**Für die nächste Einheit:**
+Wenn mehrere Einheiten im Zeitraum vorliegen:
+
+- Gesamt-TSS der Woche vs. Plan-Ziel
+- Tagesverteilung der Belastung
+- Hochintensive Einheiten: Qualität der Intervalle (Power-Decay, VI)
+
+---
+
+## 5. Trendanalyse (≥ 3 gleiche Einheitstypen)
+
+Wenn mehrere Einheiten desselben Typs vorliegen (z.B. alle K3-Sessions der
+letzten 8 Wochen), berechne Trends **auf Basis tatsächlicher Evidenz**:
+
+### Was zu analysieren ist
+
+**Power-Decay-Trend**: Wird der Leistungsabfall über die Intervallserie
+kleiner? → Zeichen verbesserter Kraftausdauer.
+
+**NP-Trend**: Steigt die Normalized Power bei gleichem IF? → Echte FTP-Entwicklung.
+
+**Drehmoment-Trend** (K3): Bleibt `avg_torque_nm` konstant bei steigenden Watts?
+→ Motorisches Muster verbessert sich.
+
+**HR-Effizienz-Trend**: Fällt HR bei gleicher Leistung? → Aerobe Adaptation.
+
+**Entkopplungs-Trend**: Nimmt `avg_decoupling_pct` ab? → Bessere Ausdauer.
+
+### Ausgabeformat Trendanalyse
+
+Zeige eine kompakte Tabelle mit Datum, NP, Power-Decay, Drehmoment, HR — eine
+Zeile pro Einheit. Dann formuliere den Trend als Evidence-basierte Aussage:
+
+> "3 von 4 K3-Einheiten zeigen Power-Decay < 5% bei Ø 43 Nm — das deutet auf
+> stabile Kraftausdauer hin. NP-Trend: 225 → 231 → 233W über 6 Wochen."
+
+---
+
+## 6. Stärken / Schwächen / Entwicklung
+
+Am Ende jeder Analyse (besonders bei mehreren Einheiten):
+
+### Stärken (konsistente Positivbefunde)
+Was zeigen die Daten wiederholt positiv: aerobe Effizienz (Pw:Hr),
+HR-Stabilität in Z2, konsistente Kadenz, niedrige Entkopplung.
+
+### Schwächen (wiederkehrende Muster)
+Wiederkehrende Auffälligkeiten: Power-Decay im letzten Intervall, erhöhter VI,
+HR über Sollbereich bei Z2, Asymmetrie Links/Rechts (falls Daten vorhanden).
+
+**Wichtig: Immer Evidence-basiert formulieren:**
+- ✗ "Du hast ein Kraftausdauerdefizit"
+- ✓ "3 von 4 Z5-Einheiten zeigen Power-Decay > 8% im letzten Intervall bei
+  HR < 88% HFmax — das deutet auf muskuläre Limitierung hin"
+
+### Entwicklung (Trend über Zeit)
+Nur wenn ≥ 3 vergleichbare Einheiten vorliegen. Trenne klar:
+- **Gesicherte Evidenz**: Zahlen aus der API
+- **Interpretation**: Physiologische Schlussfolgerung daraus
+
+---
+
+## 7. Empfehlung nächste Einheit
+
 - Was steht im Plan?
-- Anpassung nötig aufgrund der heutigen Belastung?
-- Regenerations-Warnung wenn TSS > 120 oder IF > 0.85 für die Einheit
+- Anpassung nötig aufgrund der heutigen Belastung (TSS, HR-Trend)?
+- Regenerations-Warnung wenn TSS > 120 oder IF > 0.85 für eine Einzeleinheit
 
-**Intensitäts-Drift erkennen:**
-- Wenn Z3-Anteil > 30%: "Sweetspot-Drift" – nächste Z2-Einheit strikt unter FTP
-- Wenn Ø HR bei Z2 zu hoch: Ermüdungszeichen, Erholungseinheit empfehlen
-- Wenn NP >> Avg Power (NP/AvgP > 1.15): Sehr variable Intensität
+---
 
-**Qualitätsaussagen:**
-- Trainingseffizienz: TSS/h (typisch: Z2 ~50-60, Intervall ~80-100)
-- Links/Rechts-Balance (falls vorhanden, aus `left_right_balance`)
-
-### 6. Output-Format
-
-#### Standard-Ausgabe (in der Konversation)
-
-Strukturierter Bericht mit:
-1. **Einheit-Zusammenfassung** (kompakte Tabelle)
-2. **Soll/Ist-Vergleich** (nur wenn Trainingsplan vorhanden)
-3. **Zonen-Analyse** (Power & HR als kompakte Tabelle)
-4. **Empfehlung nächste Einheit** (1-3 konkrete Sätze)
-
-#### Quarto/Markdown-Report (wenn explizit angefragt)
-
-Erstelle eine `.qmd` oder `.md` Datei mit:
-- YAML-Frontmatter (title, date, format: html/pdf)
-- Alle Tabellen als Markdown-Tabellen
-- Zonenverteilung als textuelle Beschreibung (keine Bibliotheken nötig)
-- Abschnitte: Einheit | Soll/Ist | Zonen | Empfehlung | Nächste Woche
-
-Speichere als `training-report-YYYY-MM-DD.qmd` im aktuellen Projektordner
-oder `/mnt/user-data/outputs/`.
-
-## Referenzwerte (Radsport)
+## Referenzwerte
 
 ### TSS-Kategorien
-| TSS      | Erholung       | Nächste Einheit       |
-|----------|----------------|----------------------|
-| < 150    | Minimal (<24h) | Normal               |
-| 150–300  | Normal (24h)   | Leichte Einheit ok   |
-| 300–450  | Signifikant    | Z2 oder Pause        |
-| > 450    | Sehr groß      | Mindestens 48h Pause |
+| TSS | Erholung | Nächste Einheit |
+|---|---|---|
+| < 150 | Minimal (<24h) | Normal |
+| 150–300 | Normal (24h) | Leichte Einheit ok |
+| 300–450 | Signifikant | Z2 oder Pause |
+| > 450 | Sehr groß | Min. 48h Pause |
 
 ### Intensity Factor (IF)
-| IF       | Charakter                        |
-|----------|----------------------------------|
-| < 0.75   | Erholungsfahrt / leichtes Z2     |
-| 0.75–0.85| Ausdauer Z2/Z3                   |
-| 0.85–0.95| Tempofahrt / Schwellentraining   |
-| > 0.95   | Kurzes Rennen / Maximalintervall |
+| IF | Charakter |
+|---|---|
+| < 0.75 | Erholungsfahrt / leichtes Z2 |
+| 0.75–0.85 | Ausdauer Z2/Z3 |
+| 0.85–0.95 | Tempofahrt / Schwellentraining |
+| > 0.95 | Kurzes Rennen / Maximalintervall |
+
+### Variability Index (VI = NP/AvgPower)
+| VI | Charakter |
+|---|---|
+| < 1.05 | Sehr gleichmäßig (Flachstrecke, Z2) |
+| 1.05–1.10 | Normal für Training mit Terrain |
+| > 1.10 | Hohes Intensitätsgefälle (Intervalle/Berge) |
 
 ### Power-Zonen (% FTP nach Coggan)
-| Zone | % FTP    | Bezeichnung         |
-|------|----------|---------------------|
-| Z1   | < 55%    | Aktive Erholung     |
-| Z2   | 56–75%   | Grundlagenausdauer  |
-| Z3   | 76–90%   | Tempo               |
-| Z4   | 91–105%  | Laktatschwelle      |
-| Z5   | 106–120% | VO2max              |
-| Z6   | > 120%   | Anaerob / Sprint    |
+| Zone | % FTP | Bezeichnung |
+|---|---|---|
+| Z1 | < 55% | Aktive Erholung |
+| Z2 | 56–75% | Grundlagenausdauer |
+| Z3 | 76–90% | Tempo |
+| Z4 | 91–105% | Laktatschwelle |
+| Z5 | 106–120% | VO2max |
+| Z6 | > 120% | Anaerob / Sprint |
 
-## Hinweise zur Trainingsplan-Interpretation
+### Drehmoment-Referenz (K3 Kraftausdauer)
+| Kadenz | Watt | Nm | Charakter |
+|---|---|---|---|
+| 90 rpm | 265W | ~28 Nm | Normal |
+| 60 rpm | 265W | ~42 Nm | K3-Level |
+| 50 rpm | 265W | ~50 Nm | Maximaler K3-Reiz |
 
-Typische Markdown-Formate für Trainingspläne:
-
-```markdown
-## Woche 3 – Aufbau
-
-| Tag  | Einheit         | Dauer  | TSS  | Beschreibung         |
-|------|-----------------|--------|------|----------------------|
-| Mo   | Pause/Mobility  | –      | 0    |                      |
-| Di   | Z2 Grundlage    | 2:00   | 70   | Strikt unter FTP     |
-| Mi   | Intervalle      | 1:30   | 95   | 4×8 min @ 95–105%FTP |
-```
-
-Erkenne auch narrative Formate ohne Tabelle und extrahiere Einheitstyp,
-Dauer, Intensitätsangaben.
+---
 
 ## Fehlerbehandlung
 
-- **Kein FTP in FIT-Datei**: Frage den Nutzer, nutze 250W als Fallback mit
-  explizitem Hinweis
-- **Keine Power-Daten**: Analysiere nur HR-Zonen und RPE-basiert
-- **Plan nicht gefunden**: Reine Einzel-Analyse, TSS-Einordnung nach
-  Referenztabelle, keine Soll/Ist-Spalte
-- **Mehrere Sessions in einer Datei**: Jede Session einzeln auswerten
+- **401 / Authentifizierung**: Credentials ungültig — neu abfragen, Creds-Datei löschen
+- **Keine Aktivitäten im Zeitraum**: Explizit melden, anderen Zeitraum vorschlagen
+- **Kein FTP in Daten**: Nutzer nach aktuellem FTP fragen, 275W als Fallback (mit Hinweis)
+- **Keine Intervall-Daten**: `--with-intervals` nur bei Einheiten mit erkannten Intervallen sinnvoll — bei reinen Z2-Einheiten weglassen
+- **Rechts-Links-Balance fehlt**: Explizit als "Keine Pedaldaten verfügbar" kennzeichnen

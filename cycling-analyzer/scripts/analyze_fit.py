@@ -96,6 +96,19 @@ def analyze_session(path: Path) -> dict:
         mid = sum(v["pct"] for k, v in power_zones.items() if k.startswith("Z3"))
         polarization_index = {"low_pct": round(low, 1), "mid_pct": round(mid, 1), "high_pct": round(high, 1)}
 
+    # --- Kadenz: aktiver Durchschnitt (Nullwerte = Leerlauf/Ausrollen herausfiltern) ---
+    cadence_active_avg = None
+    try:
+        fitfile2 = load_fitfile(path)
+        cadences = [
+            d.value for msg in fitfile2.get_messages("record")
+            for d in msg if d.name == "cadence" and d.value is not None and d.value > 0
+        ]
+        if cadences:
+            cadence_active_avg = round(sum(cadences) / len(cadences), 1)
+    except Exception:
+        pass
+
     result = {
         "file": path.name,
         "date": session_data.get("start_time").isoformat() if session_data.get("start_time") else None,
@@ -112,6 +125,7 @@ def analyze_session(path: Path) -> dict:
         "avg_hr": session_data.get("avg_heart_rate"),
         "max_hr": session_data.get("max_heart_rate"),
         "avg_cadence": session_data.get("avg_cadence"),
+        "avg_cadence_active": cadence_active_avg,
         "avg_speed_kmh": round(session_data.get("avg_speed", 0) * 3.6, 1),
         "sport": session_data.get("sport"),
         "workout_name": workout_name,
