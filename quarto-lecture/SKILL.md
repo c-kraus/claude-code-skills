@@ -69,6 +69,7 @@ A well-structured chapter follows this rhythm — not a rigid template, but a re
 3. **Element rhythm per section:** prose → concept anchoring (flip-card or drag-exercise) → deeper argument → case or norm anchor (details or case-study) → active recall (quick-check)
 4. **Element density:** ~1 interactive element per 400–600 words of prose. Avoid stacking 3+ of the same element type consecutively.
 5. **Closing:** A strong thought, open question, or Quick-Check. Never a summary paragraph ("In summary...", "Zusammenfassend lässt sich sagen...").
+6. **Heading hierarchy discipline:** If an H2 section contains only a single H3 subsection, the H3 level is unnecessary — promote the content to H2 and eliminate the empty nesting. The same applies at every level: a heading level is only justified when there are at least two siblings. This keeps the table of contents clean and prevents artificial hierarchy.
 
 For a concrete example of this structure in action, load `references/chapter-example.md`.
 

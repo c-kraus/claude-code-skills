@@ -126,6 +126,7 @@ After working through this material, you will be able to:
 4. If the slide had a `→ **Folge:**` or `→ **Fazit:**` consequence arrow, integrate it as a logical conclusion paragraph: "This leads to the conclusion that..." / "Daraus folgt, dass..."
 5. If the slide had a `# <!-- fit -->` provocation, render it as a blockquote and then unpack the provocative claim in 3–5 sentences.
 6. Replace every `*(Author, Year)*` citation with `[@citekey]` using your mapping from Step 3.
+7. **Heading hierarchy discipline:** If an H2 section (`##`) contains only a single H3 subsection (`###`), promote the content to H2 level and eliminate the empty nesting. A heading level is only justified when there are at least two siblings at that level.
 
 **Pause/discussion slides** → Include as a Quarto callout:
 ```markdown

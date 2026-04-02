@@ -103,6 +103,10 @@ format:
 [Returns to immediate issue. Time pressure. Leave the reader hanging.]
 ```
 
+### Heading Hierarchy Discipline
+
+If an H2 section contains only a single H3 subsection, the H3 level is unnecessary — promote the content to H2 and eliminate the empty nesting. A heading level is only justified when there are at least two siblings. Cases benefit from continuous narrative flow; artificial sub-divisions interrupt the reading experience without adding navigational value.
+
 ### Exhibits (Anlagen)
 
 Exhibits are not decoration — they are evidence. Include them when the narrative references data that students need to analyze. Common types:

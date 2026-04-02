@@ -76,6 +76,10 @@ Every presentation follows this structure:
 5. **Interaction Slides** (`structural` or `center`): Every 3–5 content slides
 6. **References Slide** (optional): Only if BibTeX mode is active
 
+### Step 4b: Heading Hierarchy Discipline
+
+When organizing content into sections (e.g., "Teil I", "Teil II" via `structural` slides), apply this rule: if a section contains only a single content sub-topic, the section wrapper is unnecessary — merge the content directly. A structural division is only justified when it groups at least two distinct sub-topics. This keeps the deck's narrative arc clean and avoids empty wrapper slides that add no orientation value.
+
 ### Step 5: CSS Classes
 
 Use ONLY these classes. Inventing new classes breaks the THWS theme.

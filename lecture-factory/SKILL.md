@@ -45,6 +45,10 @@ Do NOT use widget iframes in Stage 1 — those come in Stage 2. Placeholder comm
 <!-- Widget placeholder: ROI calculator goes here -->
 ```
 
+### Heading Hierarchy Discipline
+
+Before saving, verify: if any H2 section contains only a single H3 subsection, promote the content to H2 and eliminate the empty nesting. A heading level is only justified when there are at least two siblings at that level.
+
 ### QMD Quality Gate (run before saving)
 
 After drafting the .qmd but **before saving or presenting it**, scan every interactive element and fix any violations. This self-review step exists because these two elements are frequently malformed in ways that silently break the Moodle Lua filter.
