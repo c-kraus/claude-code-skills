@@ -107,33 +107,57 @@ format:
 
 If an H2 section contains only a single H3 subsection, the H3 level is unnecessary — promote the content to H2 and eliminate the empty nesting. A heading level is only justified when there are at least two siblings. Cases benefit from continuous narrative flow; artificial sub-divisions interrupt the reading experience without adding navigational value.
 
-### Exhibits (Anlagen)
+### Case Architecture for Lecture Use: Integrated Structure
 
-Exhibits are not decoration — they are evidence. Include them when the narrative references data that students need to analyze. Common types:
+The most important structural principle is **locality**: data and questions belong at the point in the text where they are needed, not in separate sections at the end.
 
-**Financial table:**
-```markdown
-## Anlage 1: Umsatzentwicklung 2019–2023
+**Why this matters in the classroom:** When a case separates narrative, exhibits, and discussion questions into three distinct blocks, students must read the whole thing, then re-read to connect questions to narrative, then flip to exhibits to find the numbers. In a lecture hall, this creates friction and breaks the discussion flow. The instructor has to say "go back to page 2" and "see exhibit 3 on page 5" — the case is fighting the teaching.
 
-| Jahr | Umsatz (Mio. €) | EBITDA-Marge | Mitarbeiter |
-|------|-----------------|--------------|-------------|
-| 2019 | 142             | 18,3 %       | 1.240       |
-| 2020 | 128             | 14,1 %       | 1.180       |
-| 2021 | 157             | 19,7 %       | 1.390       |
+The integrated structure solves this:
+
+```
+[Sachverhalt A — narrative + any data needed for this section]
+
+[Discussion question(s) for Sachverhalt A]
+
+---
+
+[Sachverhalt B — narrative + any data needed for this section]
+
+[Discussion question(s) for Sachverhalt B]
 ```
 
-**Timeline:**
-```markdown
-## Anlage 2: Unternehmenschronologie
+This means:
+- **Inline data tables**: Place tables, figures, and key numbers directly inside the narrative section they belong to — not in a separate "Exhibit" section at the end. A table appears where the protagonist encounters it, where the student needs it.
+- **Questions follow their section**: Each discussion question appears immediately after the section it tests. The student reads the scenario, sees the question, and has everything in one place.
 
-| Jahr | Ereignis |
-|------|----------|
-| 2005 | Gründung durch [Name] in [Stadt] |
-| 2012 | Markteintritt DACH |
-| 2018 | Börsengang SDAX |
+**When to still use a labeled block** (call it "Daten" or "Zahlen", not "Anlage"): If a table is large and would interrupt the narrative flow, you may place it as a labeled sub-block within the same section — still inline, just visually set off. Never put it at the end of the case.
+
+**Exception — pure narrative/strategy cases**: If the case contains no quantitative data and the questions are open-ended strategic choices, it can work to place all questions at the end. But as soon as numbers appear, integrate them.
+
+**Template for an integrated, quantitative case section:**
+
+```markdown
+## [Sachverhalt: descriptive title]
+
+[Narrative: what happened, what the protagonist discovered, what the decision is]
+
+[Data table inline, if needed:]
+
+| Spalte A | Spalte B |
+|----------|----------|
+| Wert     | Wert     |
+
+[If a note about the data is needed, place it here as a brief italic paragraph]
+
+**Frage [N]: [Question title in bold]**
+
+[Question text. One to three focused questions. Self-contained — the student does not need to look anything up elsewhere to answer this question.]
+
+---
 ```
 
-Place exhibits after the closing paragraph, clearly numbered. Reference them inline in the text: *(vgl. Anlage 1)*.
+This `---` separator between sections is useful: it gives visual breathing room and signals "this section is complete, next section begins."
 
 ## Phase 3: Gap Analysis
 
@@ -143,18 +167,48 @@ After completing the draft, run through this checklist before presenting to the 
 - Is the cut-off point clearly defined — does the case end *before* the decision?
 - Are immediate issue and underlying issue clearly distinct, and does the case never explicitly name the underlying issue?
 - Does the protagonist feel like a real person with real stakes, or like a placeholder?
-- Are there gaps in the narrative that should become exhibits?
+- Does every discussion question appear immediately after the section it relates to — not batched at the end?
+- Is every data table or figure placed inline at the point where it is needed in the narrative — not in a separate exhibit section?
+- Can a student answer each question without having to flip to another part of the document?
 - Does the closing paragraph create genuine urgency?
 
 Flag anything missing and propose additions.
 
+## Phase 3b: Arithmetic Quality Check (for quantitative cases)
+
+**Do this before presenting the draft to the user.** Quantitative cases fail silently — a wrong number in the data section produces a wrong "correct answer" in the teaching note, and the error only surfaces when a student finds the inconsistency in class. That is embarrassing and undermines trust in the material.
+
+For every number in the case, verify:
+
+1. **Internal consistency of input data**: Do all line items in tables sum to their stated totals? Add them up explicitly — do not eyeball. If a table shows individual items and a total, the sum must match.
+
+2. **Derivation chain**: Is every number that students are expected to calculate actually derivable from the numbers given? Work through the model solution yourself, using only the data provided in the case. If you need a number that isn't there, it must be added.
+
+3. **Cross-reference**: Does the same number appear correctly in multiple places? (e.g., a cost figure used in the narrative, then in a table, then in the solution — all three must be identical.)
+
+4. **Pro-rata and rounding**: For time-based calculations (monthly depreciation, partial-year charges), apply the pro-rata explicitly. State the exact rounding convention if results differ depending on rounding.
+
+5. **Conceptual correctness**: Beyond arithmetic, check whether the numerical setup embeds the right conceptual structure. For example: if the case involves EBITDA, does the design of the numbers actually require understanding what EBITDA includes and excludes? A number that "works out" under a wrong concept is worse than a wrong number — it teaches students to apply the wrong framework.
+
+Flag any discrepancy and resolve it in the case *before* writing the teaching note solution. A teaching note solution derived from wrong input data will itself be wrong.
+
 ## Phase 4: Teaching Note
 
-After the case draft is approved, offer to create the Teaching Note. This is a separate `.qmd` file — confidential, for the instructor only, never distributed to students.
+After the case draft is approved (and the arithmetic check has passed), offer to create the Teaching Note. This is a separate `.qmd` file — confidential, for the instructor only, never distributed to students.
 
 A Teaching Note makes the difference between a case that gets used once and one that becomes a course staple. It answers: "How do I actually run this in class?"
 
-### Teaching Note Structure
+### Structure principle: mirror the case
+
+The teaching note discussion plan must follow the same question order as the case itself. If the case has questions Q1–Q5 each after their section, the discussion plan covers Q1–Q5 in that order. Do not reorganize into "Einstieg / Vertiefung / Theoriebrücke" phases that cut across the question structure — this forces the instructor to mentally remap case to teaching note while standing at the board.
+
+For each question in the case, the teaching note provides:
+- The **model solution** (for quantitative questions: full worked calculation with intermediate steps)
+- **Common errors** students make on this question and how to address them
+- **Discussion prompts** to move the class forward if they get stuck
+- **Time allocation**
+
+### Teaching Note Template
 
 ```qmd
 ---
@@ -176,7 +230,7 @@ format:
 
 Nach der Diskussion sollen Studierende in der Lage sein:
 
-1. [Lernziel 1 — konkret und messbar formuliert]
+1. [Lernziel 1 — konkret und messbar, direkt auf eine Frage des Falls abbildbar]
 2. [Lernziel 2]
 3. [Lernziel 3]
 
@@ -188,58 +242,66 @@ Nach der Diskussion sollen Studierende in der Lage sein:
 
 **Underlying Issue:** [Name des Konzepts]
 
-[Kurze Darstellung des theoretischen Frameworks, das Studierende anwenden sollen. Literaturhinweise.]
+[Kurze Darstellung des theoretischen Frameworks. Literaturhinweise.]
 
-# Diskussionsplan
+# Vollständige Lösung
 
-## Einstieg (ca. 10 Min.)
+## Frage [N]: [Fragetitel, identisch zum Falltext]
 
-**Einstiegsfrage:** [Offene Frage, die zur Story einlädt — nicht zur Theorie]
+**Musterlösung:**
 
-*Erwartete Antworten / Leitpunkte:*
-- [Punkt 1]
-- [Punkt 2]
+[For quantitative questions: complete worked solution showing every step.
+Show the derivation chain, not just the result.
+Example format:
+  Rechnungsbetrag gesamt:  185.000 €
+  ./. Training (IAS 16.19): (3.500) €
+  ─────────────────────────────────
+  Anschaffungskosten:      181.500 €
+]
 
-## Vertiefung (ca. 25 Min.)
+**Typische Fehler:**
+- [Fehler 1 und warum er passiert]
+- [Fehler 2]
 
-**Frage 2:** [Führt in den analytischen Kern]
+**Diskussionsimpulse:** [What to ask if the class is stuck or going in the wrong direction]
 
-*Erwartete Antworten:*
-- [Punkt 1]
+**Zeitbedarf:** ca. [N] Min.
 
-**Frage 3:** [Baut Brücke zur Theorie]
+---
 
-*Erwartete Antworten:*
-- [Punkt 1]
+## Frage [N+1]: [Fragetitel]
 
-## Theoriebrücke (ca. 10 Min.)
+[Same structure — one block per question]
 
-**Frage:** Wie erklärt [Theoretisches Konzept] das, was wir gerade analysiert haben?
+---
 
-*Ziel: Studierende benennen das Underlying Issue selbst.*
+# Diskussionsplan (Zeitübersicht)
 
-## Synthese & Abschluss (ca. 10 Min.)
-
-**Schlussfrage:** Was würden Sie dem Protagonisten jetzt raten — und warum?
+| Frage | Inhalt | Dauer |
+|-------|--------|-------|
+| Einstieg | [Opening question before Q1] | 10 Min. |
+| Frage 1 | [Title] | [N] Min. |
+| Frage 2 | [Title] | [N] Min. |
+| Synthese | Abschluss und Verbindung zum nächsten Thema | 10 Min. |
+| **Gesamt** | | **[N] Min.** |
 
 # Tafelbild (Board Plan)
 
-[Skizze oder Beschreibung, wie das Tafelbild am Ende der Diskussion aussehen soll. Welche Konzepte, Argumente, Entscheidungsoptionen landen wo?]
+[Sketch or description of how the board should look at the end of discussion. What concepts, numbers, and conclusions land where. For quantitative cases: show the final calculation structure.]
 
-# Zeitplanung
+# Instructor Alerts
 
-| Phase | Dauer | Aktivität |
-|-------|-------|-----------|
-| Einstieg | 10 Min. | Einstiegsfrage, Überblick |
-| Vertiefung | 25 Min. | Analytische Diskussion |
-| Theoriebrücke | 10 Min. | Konzept benennen |
-| Synthese | 10 Min. | Handlungsempfehlung |
-| Puffer | 5 Min. | — |
-
-# Anlagen-Guide
-
-[Für jede Anlage: Wann im Diskussionsverlauf einsetzen? Was sollen Studierende darin erkennen?]
+[2–4 numbered points flagging the hardest conceptual traps in this case — the moments where students most commonly get it wrong and why. These are the teaching moments worth preparing for explicitly.]
 ```
+
+### Model solution quality for quantitative questions
+
+The model solution is the most failure-prone part of a teaching note. To write it correctly:
+
+- **Derive, don't assert**: Show every arithmetic step. A solution that says "Annual depreciation: €20,813" without showing `(181,500 − 15,000) ÷ 8 = 20,812.50` is not a model solution — it's a result that the instructor can't verify at a glance.
+- **State what's excluded and why**: For every amount not included (e.g., training costs), give the IAS/IFRS paragraph reference. This is what the student needs to learn.
+- **Show acceptable ranges for rounded results**: If a calculation involves intermediate rounding, state which values are acceptable (e.g., "€4,440–€4,442 depending on rounding").
+- **Cross-check the solution against the case data before writing it**: Use only numbers that appear in the case. If you find yourself needing a number that isn't in the case, go back and add it.
 
 ## Best Practices
 
