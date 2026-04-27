@@ -65,17 +65,10 @@ Wait for answers before starting Phase 2. A case built on vague foundations cann
 title: "[Case Title: Punchy Subtitle]"
 subtitle: "Teaching Case"
 author: "[Author Name]"
-date: "[YYYY-MM-DD]"
+date: last-modified
 lang: de
 format:
-  html:
-    embed-resources: true
-    toc: true
-    toc-depth: 2
-  pdf:
-    documentclass: article
-    geometry: "margin=2.5cm"
-    toc: false
+  handout-typst
 ---
 
 # [Case Title]
@@ -159,6 +152,8 @@ This means:
 
 This `---` separator between sections is useful: it gives visual breathing room and signals "this section is complete, next section begins."
 
+**German-language cases (THWS/IFRS context):** Use `### Aufgabe N — [Analysefeld]` for task headings and `**Anlage N: [Titel]**` (bold, not a heading) for data tables within the same section. Task titles name the analytical field, not the theory: `Aufgabe 2 — Erstbewertung und Folgebewertung` not `Aufgabe 2 — IFRS 16.26–27 anwenden`. Tasks are broad, open-ended — no a/b/c/d sub-parts that walk students through the method. Finding the method is their job.
+
 ## Phase 3: Gap Analysis
 
 After completing the draft, run through this checklist before presenting to the user:
@@ -213,17 +208,12 @@ For each question in the case, the teaching note provides:
 ```qmd
 ---
 title: "Teaching Note: [Case Title]"
-subtitle: "Vertraulich – nur für Lehrende"
+subtitle: "Vertraulich — nur für Lehrende"
 author: "[Author]"
-date: "[YYYY-MM-DD]"
+date: last-modified
 lang: de
 format:
-  html:
-    embed-resources: true
-    toc: true
-  pdf:
-    documentclass: article
-    geometry: "margin=2.5cm"
+  handout-typst
 ---
 
 # Lernziele
@@ -313,7 +303,7 @@ The model solution is the most failure-prone part of a teaching note. To write i
 
 ## Output
 
-Save both the case study and (if created) the Teaching Note to `/sessions/elegant-festive-brown/mnt/outputs/` and present links to the user via the `present_files` tool.
+Save both files to the project's `Fallstudien/` directory (relative to the working directory), or to the path the user specifies.
 
 File naming convention:
 - Case: `fallstudie_[unternehmensname]_[jahr].qmd`
