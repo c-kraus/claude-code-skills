@@ -210,6 +210,17 @@ $$
 
 - **Cross-referenced equation:** append `{#eq-label}` after the closing `$$` for `@eq-label` references elsewhere in the chapter.
 - Always define variables in a sentence immediately following the formula.
+- **Never place currency symbols (€, $, £) inside `$$` math blocks.** LaTeX/MathJax does not render `€` correctly in math mode and produces a math input error. Write the result as a plain number inside the formula; state the currency in the surrounding prose or in a `\text{}` suffix — but even `\text{€}` is unreliable across renderers. Preferred pattern:
+
+```
+<!-- ✓ CORRECT: currency in surrounding text, not in formula -->
+**Example:** Cost €110,000, residual value €5,000, useful life 5 years.
+
+$$\text{Annual Depreciation} = \frac{110{,}000 - 5{,}000}{5} = 21{,}000 \text{ per year}$$
+
+<!-- ✗ WRONG: € inside $$ block causes math input error -->
+$$\text{Annual Depreciation} = \frac{110{,}000 - 5{,}000}{5} = €21{,}000 \text{ per year}$$
+```
 
 ## Inline Case Study vs. Full Fallstudie
 

@@ -9,11 +9,34 @@ Generate `.excalidraw` JSON files that **argue visually**, not just display info
 
 **Setup:** If the user asks you to set up this skill (renderer, dependencies, etc.), see `README.md` for instructions.
 
+## Fast Path — Use This for Most Diagrams
+
+**90% of lecture and concept diagrams fit one of six templates.** Skip the full design process and go directly:
+
+1. **Read** `references/color-palette.md` (colors)
+2. **Pick** the right template from `references/layout-templates.md`:
+   - **A** — 3-box flow (A→B→C)
+   - **B** — 4-box flow (A→B→C→D)
+   - **C** — Split zone left/right with divider (Balance Sheet | Income Statement)
+   - **D** — 2-column comparison (Method A vs Method B)
+   - **E** — Vertical timeline (chronological sequence)
+   - **F** — Hub and spoke (one center → multiple effects)
+3. **Copy** the template JSON, replace LABEL / STROKE / FILL / ARROW_COLOR with real content from the color palette
+4. **Add** any free-floating text labels, sub-labels, or annotations
+5. **Write** the `.excalidraw` file and **render** immediately
+
+No planning phase, no sketching, no 6-step design process. Templates have all coordinates pre-calculated.
+
+**Use the full Design Process below only when:**
+- The concept genuinely doesn't fit any template
+- The diagram is a complex technical architecture requiring evidence artifacts
+- The user explicitly asks for a non-standard layout
+
+---
+
 ## Customization
 
 **All colors and brand-specific styles live in one file:** `references/color-palette.md`. Read it before generating any diagram and use it as the single source of truth for all color choices — shape fills, strokes, text colors, evidence artifact backgrounds, everything.
-
-To make this skill produce diagrams in your own brand style, edit `color-palette.md`. Everything else in this file is universal design methodology and Excalidraw best practices.
 
 ---
 
@@ -450,11 +473,31 @@ You cannot judge a diagram from JSON alone. After generating or editing the Exca
 
 ### How to Render
 
+The render script uses a local canvas server (no external network calls, no timeouts):
+
 ```bash
-cd .claude/skills/excalidraw-diagram/references && uv run python render_excalidraw.py <path-to-file.excalidraw>
+python ~/.claude/skills/excalidraw-diagram/references/render_excalidraw.py <path-to-file.excalidraw>
 ```
 
 This outputs a PNG next to the `.excalidraw` file. Then use the **Read tool** on the PNG to actually view it.
+
+**Prerequisites — canvas server must be running:**
+```bash
+# Start once per session (background):
+cd ~/Dev/mcp_excalidraw && PORT=3000 npm run canvas &
+# Then open http://localhost:3000 in any browser tab (keeps the renderer alive)
+```
+
+**Fully headless (no browser tab needed):** add `--headless` flag and the script opens localhost:3000 in a headless Playwright browser automatically:
+```bash
+python ~/.claude/skills/excalidraw-diagram/references/render_excalidraw.py <file.excalidraw> --headless
+```
+
+**Check if the server is already running:**
+```bash
+curl -s http://localhost:3000/health
+# → {"status":"healthy","websocket_clients":N,...}  — if N > 0, ready to export
+```
 
 ### The Loop
 
@@ -500,12 +543,18 @@ The loop is done when:
 - Spacing is consistent and the composition is balanced
 - You'd be comfortable showing it to someone without caveats
 
-### First-Time Setup
-If the render script hasn't been set up yet:
+### First-Time Setup (one-time only)
 ```bash
-cd .claude/skills/excalidraw-diagram/references
-uv sync
-uv run playwright install chromium
+# 1. Clone and build the canvas server
+git clone https://github.com/yctimlin/mcp_excalidraw.git ~/Dev/mcp_excalidraw
+cd ~/Dev/mcp_excalidraw && npm ci && npm run build
+
+# 2. Register as Claude Code MCP
+claude mcp add excalidraw -s user -e EXPRESS_SERVER_URL=http://localhost:3000 \
+  -- node ~/Dev/mcp_excalidraw/dist/index.js
+
+# 3. (Optional) install Playwright for --headless mode
+pip install playwright && playwright install chromium
 ```
 
 ---

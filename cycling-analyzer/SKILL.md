@@ -14,82 +14,72 @@ description: >
 
 # Cycling Analyzer Skill
 
-Analysiert Radtraining-Einheiten über die **intervals.icu API** und vergleicht
-sie mit dem Trainingsplan. Datenquelle ist intervals.icu (nicht mehr FIT-Dateien).
+Analysiert Radtraining-Einheiten über den **intervals.icu MCP-Server** und
+vergleicht sie mit dem Trainingsplan. Datenquelle ist intervals.icu.
 
 ---
 
-## 0. Credentials (einmalig pro Session)
+## 0. Credentials
 
-Prüfe ob `/tmp/.icu_creds` existiert:
+Credentials sind dauerhaft gespeichert in:
+`~/.claude/skills/cycling-analyzer/.icu_creds`
 
-```bash
-cat /tmp/.icu_creds 2>/dev/null
+Lese die Datei mit dem Read-Tool und extrahiere `ATHLETE_ID` und `API_KEY`.
+Diese Werte werden bei jedem MCP-Tool-Aufruf als `athlete_id` und `api_key`
+übergeben.
+
+Wenn die Datei nicht existiert: Nutzer einmalig nach Athlete-ID und API Key
+fragen (intervals.icu/settings → "Developer Settings"), dann speichern:
+
 ```
-
-Wenn die Datei nicht existiert oder leer ist: **Frage den Nutzer einmalig**
-nach Athlete-ID und API Key (zu finden unter intervals.icu/settings →
-"Developer Settings"). Schreibe dann:
-
-```bash
-printf 'ATHLETE_ID=%s\nAPI_KEY=%s\n' "<id>" "<key>" > ~/.claude/skills/cycling-analyzer/.icu_creds
-chmod 600 ~/.claude/skills/cycling-analyzer/.icu_creds
+ATHLETE_ID=iXXXXXX
+API_KEY=xxxxxxxxxxxx
 ```
-
-Die Datei ist dauerhaft gespeichert und in `.gitignore` eingetragen — wird
-nie nochmals abgefragt.
 
 ---
 
-## 1. Daten abrufen
+## 1. Daten abrufen via MCP-Tools
 
-Installiere das requests-Package falls nötig:
+### Aktivitäten eines Zeitraums
 
-```bash
-pip3 install requests --break-system-packages -q
-```
+`mcp__intervals-icu__get_activities` mit:
+- `athlete_id`, `api_key`
+- `start_date` / `end_date` (YYYY-MM-DD)
+- `limit` — großzügig wählen (z.B. 20) bei Trendanalysen
 
-### Einzelner Tag / aktuelle Einheit
+→ Liefert pro Aktivität: ID, Name, Typ, Datum, Dauer, Distanz, avg/weighted
+Power, TSS, IF, HR, Kadenz, CTL, ATL, L/R Balance, Decoupling, Polarization
+Index.
 
-```bash
-python3 ~/.claude/skills/cycling-analyzer/scripts/fetch_intervals_icu.py \
-  --creds-file /tmp/.icu_creds \
-  --date YYYY-MM-DD \
-  --with-intervals
-```
+### Intervall-Details einer Aktivität
 
-### Letzte N Tage (Wochenübersicht)
+Wenn Intervall-Analyse nötig (K3, Z5, Over-Under):
+1. Erst `get_activities` → Activity-ID ermitteln
+2. Dann `mcp__intervals-icu__get_activity_intervals` mit `activity_id` und `api_key`
 
-```bash
-python3 ~/.claude/skills/cycling-analyzer/scripts/fetch_intervals_icu.py \
-  --creds-file /tmp/.icu_creds \
-  --days 7
-```
+→ Liefert alle WORK/REST-Segmente mit Power, HR, Kadenz, Drehmoment,
+Entkopplung pro Intervall.
 
-### Trendanalyse (mehrere Wochen, mit Intervall-Details)
+### Einzelne Aktivität (Detailansicht)
 
-```bash
-python3 ~/.claude/skills/cycling-analyzer/scripts/fetch_intervals_icu.py \
-  --creds-file /tmp/.icu_creds \
-  --oldest YYYY-MM-DD --newest YYYY-MM-DD \
-  --with-intervals
-```
+`mcp__intervals-icu__get_activity_details` mit `activity_id` und `api_key`
 
-Das Skript gibt strukturiertes JSON zurück mit:
-- `activities[]`: Liste der Radeinheiten im Zeitraum
-- Pro Aktivität: `avg_power_w`, `normalized_power_w` (NP), `ftp_w`,
-  `intensity_factor` (IF), `tss`, `variability_index` (VI), `avg_hr`,
-  `max_hr`, `avg_cadence`, `left_right_balance`, `pw_hr`
-- Bei `--with-intervals`: `intervals[]` (jedes WORK/REST-Segment) und
-  `interval_summary` mit `power_decay_pct`, `avg_torque_nm`,
-  `avg_decoupling_pct`, `hr_drift_pct`
+→ Liefert vollständige Metriken einer einzelnen Einheit.
+
+### Wellness / CTL-ATL-Verlauf
+
+`mcp__intervals-icu__get_wellness_data` mit `athlete_id`, `api_key`,
+`start_date`, `end_date`
+
+→ Liefert tägliche CTL (Fitness), ATL (Fatigue), Form (TSB), HRV, Schlaf,
+Gewicht.
 
 ---
 
 ## 2. Trainingsplan lesen
 
 Suche im Projektordner nach dem Trainingsplan (typisch `kw*_trainingspeaks.md`,
-`grobplan.md`, oder ähnlich). Identifiziere:
+`grobplan.md`). Identifiziere:
 
 - **Wochenstruktur**: Welche Einheit ist für welchen Tag geplant?
 - **Einheitstypen**: Z2, K3, Z5, Over-Under, Aktivierung
@@ -111,7 +101,7 @@ Ordne die Einheit dem Plan zu und erstelle:
 | IF | ~0.96 | 0.85 | ⚠ |
 | Typ | K3 Kraftausdauer | ✓ | ✓ |
 
-**Intervall-Qualität** (wenn `interval_summary` vorhanden):
+**Intervall-Qualität** (wenn Intervall-Daten vorhanden):
 
 | Kennzahl | Wert | Bewertung |
 |---|---|---|
@@ -121,9 +111,22 @@ Ordne die Einheit dem Plan zu und erstelle:
 | Pw:Hr-Entkopplung | 2.1% | ✓ (<5%) |
 | HR-Drift 1.→letztes Int. | +4 bpm | ✓ stabil |
 
+**CTL/ATL-Kontext** (immer wenn verfügbar angeben):
+
+| Kennzahl | Wert | Bedeutung |
+|---|---|---|
+| CTL (Fitness) | z.B. 34 | Langfristige Fitness |
+| ATL (Fatigue) | z.B. 62 | Akute Ermüdung |
+| ATL/CTL-Ratio | 1.8 | >2.0 = Überlastungsrisiko |
+
 **Polarisierungscheck** (für Z2-Einheiten):
 - Optimal: ~80% Zeit Z1/Z2, ~20% Z4–Z6
 - Z3-Anteil > 30% = "Sweetspot-Drift"
+- Polarization Index aus MCP direkt verfügbar — nutzen
+
+**L/R Balance** (bei Außenfahrten):
+- Normalbereich: 48–52% links
+- Abweichung >3% konsistent = Asymmetrie-Hinweis
 
 ---
 
@@ -132,69 +135,63 @@ Ordne die Einheit dem Plan zu und erstelle:
 Wenn mehrere Einheiten im Zeitraum vorliegen:
 
 - Gesamt-TSS der Woche vs. Plan-Ziel
+- CTL/ATL-Verlauf über die Woche
 - Tagesverteilung der Belastung
-- Hochintensive Einheiten: Qualität der Intervalle (Power-Decay, VI)
+- Hochintensive Einheiten: Qualität der Intervalle
 
 ---
 
 ## 5. Trendanalyse (≥ 3 gleiche Einheitstypen)
 
-Wenn mehrere Einheiten desselben Typs vorliegen (z.B. alle K3-Sessions der
-letzten 8 Wochen), berechne Trends **auf Basis tatsächlicher Evidenz**:
+Wenn mehrere Einheiten desselben Typs vorliegen:
 
-### Was zu analysieren ist
+**Power-Decay-Trend**: Wird der Leistungsabfall über die Intervallserie kleiner?
+→ Zeichen verbesserter Kraftausdauer.
 
-**Power-Decay-Trend**: Wird der Leistungsabfall über die Intervallserie
-kleiner? → Zeichen verbesserter Kraftausdauer.
-
-**NP-Trend**: Steigt die Normalized Power bei gleichem IF? → Echte FTP-Entwicklung.
+**NP-Trend**: Steigt die Normalized Power bei gleichem IF?
+→ Echte FTP-Entwicklung.
 
 **Drehmoment-Trend** (K3): Bleibt `avg_torque_nm` konstant bei steigenden Watts?
 → Motorisches Muster verbessert sich.
 
-**HR-Effizienz-Trend**: Fällt HR bei gleicher Leistung? → Aerobe Adaptation.
+**HR-Effizienz-Trend**: Fällt HR bei gleicher Leistung?
+→ Aerobe Adaptation.
 
-**Entkopplungs-Trend**: Nimmt `avg_decoupling_pct` ab? → Bessere Ausdauer.
+**CTL-Trend**: Steigt CTL über Wochen konsistent?
+→ Positive Trainingsanpassung.
 
 ### Ausgabeformat Trendanalyse
 
-Zeige eine kompakte Tabelle mit Datum, NP, Power-Decay, Drehmoment, HR — eine
-Zeile pro Einheit. Dann formuliere den Trend als Evidence-basierte Aussage:
+Kompakte Tabelle: Datum | NP | Power-Decay | Drehmoment | HR | CTL — eine Zeile
+pro Einheit. Dann Evidence-basierte Aussage:
 
-> "3 von 4 K3-Einheiten zeigen Power-Decay < 5% bei Ø 43 Nm — das deutet auf
-> stabile Kraftausdauer hin. NP-Trend: 225 → 231 → 233W über 6 Wochen."
+> "3 von 4 K3-Einheiten zeigen Power-Decay < 5% bei Ø 43 Nm — stabile
+> Kraftausdauer. NP-Trend: 225 → 231 → 233W. CTL: 28 → 32 → 35."
 
 ---
 
 ## 6. Stärken / Schwächen / Entwicklung
 
-Am Ende jeder Analyse (besonders bei mehreren Einheiten):
-
 ### Stärken (konsistente Positivbefunde)
-Was zeigen die Daten wiederholt positiv: aerobe Effizienz (Pw:Hr),
-HR-Stabilität in Z2, konsistente Kadenz, niedrige Entkopplung.
+Aerobe Effizienz (Pw:Hr), HR-Stabilität in Z2, Kadenz, niedrige Entkopplung,
+L/R-Symmetrie, steigende CTL.
 
 ### Schwächen (wiederkehrende Muster)
-Wiederkehrende Auffälligkeiten: Power-Decay im letzten Intervall, erhöhter VI,
-HR über Sollbereich bei Z2, Asymmetrie Links/Rechts (falls Daten vorhanden).
+Power-Decay im letzten Intervall, erhöhter VI, HR über Sollbereich bei Z2,
+L/R-Asymmetrie, hohe ATL/CTL-Ratio.
 
-**Wichtig: Immer Evidence-basiert formulieren:**
+**Immer Evidence-basiert formulieren:**
 - ✗ "Du hast ein Kraftausdauerdefizit"
-- ✓ "3 von 4 Z5-Einheiten zeigen Power-Decay > 8% im letzten Intervall bei
-  HR < 88% HFmax — das deutet auf muskuläre Limitierung hin"
-
-### Entwicklung (Trend über Zeit)
-Nur wenn ≥ 3 vergleichbare Einheiten vorliegen. Trenne klar:
-- **Gesicherte Evidenz**: Zahlen aus der API
-- **Interpretation**: Physiologische Schlussfolgerung daraus
+- ✓ "3 von 4 Z5-Einheiten zeigen Power-Decay > 8% im letzten Intervall —
+  deutet auf muskuläre Limitierung hin"
 
 ---
 
 ## 7. Empfehlung nächste Einheit
 
 - Was steht im Plan?
-- Anpassung nötig aufgrund der heutigen Belastung (TSS, HR-Trend)?
-- Regenerations-Warnung wenn TSS > 120 oder IF > 0.85 für eine Einzeleinheit
+- CTL/ATL-Ratio beachten: bei ATL/CTL > 2.0 Warnung ausgeben
+- Regenerations-Warnung wenn TSS > 120 oder IF > 0.85
 
 ---
 
@@ -208,6 +205,14 @@ Nur wenn ≥ 3 vergleichbare Einheiten vorliegen. Trenne klar:
 | 300–450 | Signifikant | Z2 oder Pause |
 | > 450 | Sehr groß | Min. 48h Pause |
 
+### ATL/CTL-Ratio (Fatigue/Fitness)
+| Ratio | Zustand |
+|---|---|
+| < 1.0 | Frisch / Taper |
+| 1.0–1.5 | Normales Training |
+| 1.5–2.0 | Hohe Belastung — beobachten |
+| > 2.0 | Überlastungsrisiko — Warnung |
+
 ### Intensity Factor (IF)
 | IF | Charakter |
 |---|---|
@@ -219,9 +224,9 @@ Nur wenn ≥ 3 vergleichbare Einheiten vorliegen. Trenne klar:
 ### Variability Index (VI = NP/AvgPower)
 | VI | Charakter |
 |---|---|
-| < 1.05 | Sehr gleichmäßig (Flachstrecke, Z2) |
-| 1.05–1.10 | Normal für Training mit Terrain |
-| > 1.10 | Hohes Intensitätsgefälle (Intervalle/Berge) |
+| < 1.05 | Sehr gleichmäßig |
+| 1.05–1.10 | Normal für Terrain |
+| > 1.10 | Hohes Intensitätsgefälle |
 
 ### Power-Zonen (% FTP nach Coggan)
 | Zone | % FTP | Bezeichnung |
@@ -242,10 +247,38 @@ Nur wenn ≥ 3 vergleichbare Einheiten vorliegen. Trenne klar:
 
 ---
 
+## Workout-Events in intervals.icu erstellen
+
+Verwende `mcp__intervals-icu__add_or_update_event` zum Anlegen von Trainingsevents.
+
+### Sprint-Schritte (ALL OUT / HT-Sprints)
+
+**Niemals `maxeffort: true` verwenden** — Wahoo und Zwift lehnen das ab:
+- Wahoo: "each interval must have a valid targets array"
+- Zwift: "Element 'MaxEffort' must have no element [children]"
+
+**Korrekt für All-Out-Sprints:** Absoluten Wattwert **900W** verwenden:
+```json
+{"duration": 12, "power": {"value": 900, "units": "w"}, "text": "Sprint ALL OUT"}
+```
+
+Grund: 900W ist hoch genug dass der Athlet im ERG-Modus (Zwift/Wahoo) aus dem
+Modus herausgedrückt wird und frei sprintet — genau das gewünschte Verhalten
+für 10–15'' All-Out-Sprints.
+
+### Verschachtelte Steps
+
+Nur eine Ebene Verschachtelung erlaubt. `reps` innerhalb von `reps` führt zu
+"Nested steps not supported". Mehrere separate Repeat-Blöcke hintereinander
+(z.B. 3× Set als drei einzelne `reps`-Blöcke) funktioniert.
+
+---
+
 ## Fehlerbehandlung
 
-- **401 / Authentifizierung**: Credentials ungültig — neu abfragen, Creds-Datei löschen
-- **Keine Aktivitäten im Zeitraum**: Explizit melden, anderen Zeitraum vorschlagen
-- **Kein FTP in Daten**: Nutzer nach aktuellem FTP fragen, 275W als Fallback (mit Hinweis)
-- **Keine Intervall-Daten**: `--with-intervals` nur bei Einheiten mit erkannten Intervallen sinnvoll — bei reinen Z2-Einheiten weglassen
-- **Rechts-Links-Balance fehlt**: Explizit als "Keine Pedaldaten verfügbar" kennzeichnen
+- **403 Forbidden**: athlete_id oder api_key falsch — Creds-Datei prüfen
+- **Keine Aktivitäten**: Zeitraum anpassen, anderen Datumsbereich vorschlagen
+- **Kein FTP**: Nutzer fragen, 275W als Fallback (mit Hinweis)
+- **Keine Intervall-Daten**: Nur bei Einheiten mit erkannten Intervallen
+  `get_activity_intervals` aufrufen — bei reinen Z2 weglassen
+- **L/R Balance fehlt**: Als "Keine Pedaldaten / Zwift-Session" kennzeichnen
